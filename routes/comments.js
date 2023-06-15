@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const router = express.Router();
-const Comment = require('../schemas/comment.js')
+const Comment = require('../schemas/comment.js');
+const post = require('../schemas/post.js');
 
 router.route('/:postId')
   .get(async (req, res) => {
@@ -15,7 +16,9 @@ router.route('/:postId')
             commentId: comment._id,
             user: comment.user,
             content: comment.content,
-            createdAt: comment.createdAt
+            createdAt: comment.createdAt,
+            postId: post._id
+            
           }
         })
         res.json({ data: data })
