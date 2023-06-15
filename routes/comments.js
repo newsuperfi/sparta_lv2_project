@@ -8,7 +8,7 @@ router.route('/:postId')
   .get(async (req, res) => {
     const postId = req.params.postId;
     if (ObjectId.isValid(postId)) {
-      const comments = await Comment.find({ postId: postId })
+      const comments = await Comment.find({ postId: postId }).sort({ createdAt: -1 })
       if (comments.length) {
         const data = comments.map((comment) => {
           return {
@@ -29,31 +29,39 @@ router.route('/:postId')
   .post(async (req, res) => {
     const postId = req.params.postId;
     const { user, password, content } = req.body;
-    Comment.create({ postId, user, password, content });
-    res.json({ message: '댓글이 작성되었습니다.' })
+    if (!content) {
+      res.json({ errorMessage: "댓글 내용을 입력해주세요." })
+    } else {
+      Comment.create({ postId, user, password, content });
+      res.json({ message: '댓글이 작성되었습니다.' })
+    }
   })
 
 router.route('/:commentId')
   .put(async (req, res) => {
     const commentId = req.params.commentId;
     const { password, content } = req.body;
-    if(ObjectId.isValid(commentId)){
-      const comment = await Comment.findById(commentId)
-      if (comment) {
-        if(comment.password === password) {
-          await Comment.updateOne(
-            { _id: commentId },
-            { $set: { content: content } })
+    if (!content) {
+      res.status(400).json({ errorMessage: "댓글 내용을 입력해주세요." })
+    } else {
+      if (ObjectId.isValid(commentId)) {
+        const comment = await Comment.findById(commentId)
+        if (comment) {
+          if (comment.password === password) {
+            await Comment.updateOne(
+              { _id: commentId },
+              { $set: { content: content } })
             res.json({ Message: "수정이 완료되었습니다." })
+          } else {
+            res.status(400).json({ errorMessage: "비밀번호가 다릅니다." })
+          };
         } else {
-          res.status(400).json({ errorMessage: "비밀번호가 다릅니다."})
+          res.status(400).json({ errorMessage: "존재하지 않는 댓글입니다." })
         };
       } else {
-        res.status(400).json({ errorMessage: "존재하지 않는 댓글입니다."})
+        res.status(400).json({ errorMessage: "데이터 형식이 올바르지 않습니다." });
       };
-    } else {
-      res.status(400).json({ errorMessage: "데이터 형식이 올바르지 않습니다."});
-    };
+    }
   })
   .delete(async (req, res) => {
     const commentId = req.params.commentId;
@@ -65,13 +73,13 @@ router.route('/:commentId')
           await Comment.deleteOne({ _id: commentId })
           res.json({ message: "댓글이 삭제되었습니다." })
         } else {
-          res.status(404).json({ errorMessage: "비밀번호가 다릅니다."})
+          res.status(404).json({ errorMessage: "비밀번호가 다릅니다." })
         }
       } else {
-        res.status(400).json({ errorMessage: "존재하지 않는 댓글입니다."})
+        res.status(400).json({ errorMessage: "존재하지 않는 댓글입니다." })
       }
     } else {
-      res.status(400).json({ errorMessage: "데이터 형식이 올바르지 않습니다."})
+      res.status(400).json({ errorMessage: "데이터 형식이 올바르지 않습니다." })
     }
   })
 

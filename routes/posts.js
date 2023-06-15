@@ -7,7 +7,7 @@ const { ObjectId } = mongoose.Types;
 
 router.route('/')
   .get(async (req, res) => {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({createdAt: -1});
     if (posts.length) {
       const results = posts.map((post) => {
         return {

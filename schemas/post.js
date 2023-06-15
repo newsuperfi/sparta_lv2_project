@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 const ObjectId = mongoose.Types.ObjectId;
 
-// ObjectId.prototype.valueOf = function () {
-// 	return this.toString();
-// };
-
 const postSchema = new mongoose.Schema({
   postId: {
     type: ObjectId
