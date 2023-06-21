@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connect = () => {
   mongoose
-    .connect("mongodb://127.0.0.1:27017/lv1_personal_project")
+    .connect("mongodb://127.0.0.1:27017/lv2_personal_project")
     .then(console.log('몽고디비 연결 완료'))
     .catch(err => console.log(err));
 };

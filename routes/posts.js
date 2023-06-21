@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const auth = require('../middlewares/auth');
 
 const Post = require('../schemas/post.js');
 const mongoose = require('mongoose');
@@ -12,7 +14,7 @@ router.route('/')
       const results = posts.map((post) => {
         return {
           "postId": post._id,
-          "user": post.user,
+          "user": post.userId,
           "title": post.title,
           "createdAt": post.createdAt,
         };
@@ -21,9 +23,8 @@ router.route('/')
     } else {
       res.json({ errorMessage: "포스트가 존재하지 않습니다." })
     }
-
   })
-  .post((req, res) => {
+  .post(auth, (req, res) => {
     const { user, password, title, content } = req.body;
     Post.create({ user, password, title, content })
     res.json({ message: '게시글을 생성하였습니다.' });
@@ -37,7 +38,7 @@ router.route('/:postId')
       if (post) {
         const results = {
           "postId": postId,
-          "user": post.user,
+          "writer": post.writer,
           "title": post.title,
           "content": post.content,
           "createdAt": post.createdAt

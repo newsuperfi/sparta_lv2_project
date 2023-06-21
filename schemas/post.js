@@ -5,7 +5,6 @@ const ObjectId = mongoose.Types.ObjectId;
 const postSchema = new mongoose.Schema({
   postId: { 
     type:ObjectId,
-    ref:'Comment'
   },
   user: {
     type: String,

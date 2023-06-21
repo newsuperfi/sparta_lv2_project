@@ -1,7 +1,7 @@
 {
-  "name": "lv1_personal_project",
+  "name": "lv2_personal_project",
   "version": "1.0.0",
-  "description": "nodejs 주특기 입문 1주차 개인과제(API만들기)",
+  "description": "nodejs 주특기 2주차 숙련 개인과제",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app"
@@ -9,7 +9,9 @@
   "author": "newsuperfi",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.2.4"
   },
   "devDependencies": {
