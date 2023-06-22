@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const auth = require('../middlewares/auth');
+const commentRouter = require('./comments');
 
 const Post = require('../schemas/post.js');
 const mongoose = require('mongoose');
@@ -9,14 +10,14 @@ const { ObjectId } = mongoose.Types;
 
 router.route('/')
   .get(async (req, res) => {
-    const posts = await Post.find().sort({createdAt: -1});
+    const posts = await Post.find().sort({ createdAt: -1 });
     if (posts.length) {
       const results = posts.map((post) => {
         return {
-          "postId": post._id,
-          "user": post.userId,
-          "title": post.title,
-          "createdAt": post.createdAt,
+          "_Id": post._id,
+          "작성자": post.user,
+          "제목": post.title,
+          "작성일시": post.createdAt,
         };
       });
       res.json({ data: results })
@@ -26,7 +27,8 @@ router.route('/')
   })
   .post(auth, (req, res) => {
     const { user, password, title, content } = req.body;
-    Post.create({ user, password, title, content })
+    userId = res.locals.user.userId;
+    Post.create({ user, password, title, content, userId })
     res.json({ message: '게시글을 생성하였습니다.' });
   })
 
@@ -37,25 +39,30 @@ router.route('/:postId')
       const post = await Post.findById(postId);
       if (post) {
         const results = {
-          "postId": postId,
+          "_id": post._id,
           "writer": post.writer,
           "title": post.title,
           "content": post.content,
           "createdAt": post.createdAt
         }
         res.json({ data: results })
-      } else {
+      } else if (post.userId !== userId) {
+        res.json(400).json({ errorMessage: "권한이 없습니다."})
+      }
+      else {
         res.status(400).json({ errorMessage: "존재하지 않는 데이터입니다." });
       }
     } else {
       res.status(400).json({ errorMessage: "데이터 형식이 올바르지 않습니다." });
     }
   })
-  .put(async (req, res) => {
+  .put(auth, async (req, res) => {
     const { password, user, title, content } = req.body;
     const postId = req.params.postId;
+    const { userId } = res.locals.user;
     if (ObjectId.isValid(postId)) {
       const post = await Post.findById(postId);
+      console.log(post)
       if (post) {
         if (password !== post.password) {
           res.status(400).json({ errorMessage: "비밀번호가 일치하지 않습니다." })
@@ -71,14 +78,17 @@ router.route('/:postId')
       };
     };
   })
-  .delete(async (req, res) => {
+  .delete(auth, async (req, res) => {
     const { password } = req.body;
     const postId = req.params.postId;
     const post = await Post.findOne({ _id: postId })
+    const userId = res.locals.user.userId;
     if (ObjectId.isValid(postId)) {
       if (post) {
         if (post.password !== password) {
           res.status(400).json({ errorMessage: "비밀번호가 일치하지 않습니다." })
+        } else if (userId !== post.userId) {
+          res.status(400).json({ errorMessage: "글 작성자가 아닙니다." })
         } else {
           await Post.deleteOne({ _id: postId });
           res.status(200).json({ success: true })

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 const postSchema = new mongoose.Schema({
-  postId: { 
-    type:ObjectId,
+  userId: {
+    type: String,
   },
   user: {
     type: String,

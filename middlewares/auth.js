@@ -7,12 +7,12 @@ module.exports = async (req, res, next) => {
   if (tokenType !== 'Bearer' || !token) {
     return res.status(401).json({ message: "토큰 타입이 일치하지 않거나, 토큰이 존재하지 않습니다." })
   }
-
   try {
     const decodedToken = jwt.verify(token, "customized-secret-key");
     const userId = decodedToken.userId;
 
     const user = await User.findOne({ userId });
+
 
     if(!user) {
       return res.status(401).json({ message: "토큰에 해당하는 사용자가 존재하지 않습니다."})
